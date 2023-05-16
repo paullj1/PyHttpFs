@@ -9,7 +9,6 @@ import sys
 
 from argparse import ArgumentParser
 from datetime import datetime
-from tabulate import tabulate
 
 from .types import File, Timestamp
 

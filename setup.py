@@ -11,8 +11,7 @@ setup(name='pyhttpfs',
       packages=['pyhttpfs'],
       dependencies=[
           'httpx',
-          'pyfuse3',
-          'tabulate'
+          'pyfuse3'
       ],
       entry_points = {
           'console_scripts': [
