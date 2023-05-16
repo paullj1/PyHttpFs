@@ -45,7 +45,10 @@ class HttpFs(pyfuse3.Operations):
 
     async def async_get_json(self, url):
         async with httpx.AsyncClient() as client:
-            return (await client.get(url, follow_redirects=True)).json()
+            response = await client.get(url, follow_redirects=True)
+            if not response.is_success:
+                raise(pyfuse3.FUSEError(errno.ENOENT))
+            return response.json()
 
     async def lookup(self, inode_p, name, ctx=None):
         name = os.fsdecode(name)
@@ -74,6 +77,9 @@ class HttpFs(pyfuse3.Operations):
     async def _load_children(self, pobj):
         log.info(f"Loading children for {pobj.full_path()}")
         url = self._url + pobj.full_path()
+        # Should only ever get called on dirs, avoids redirect
+        if url[-1] != '/':
+            url += '/'
 
         for f in await self.async_get_json(url):
             c = File.from_json(f)
@@ -177,6 +183,8 @@ class HttpFs(pyfuse3.Operations):
 
         async with httpx.AsyncClient() as client:
             async with client.stream('GET', uri) as response:
+                if not response.is_success:
+                    raise pyfuse3.FUSEError(errno.ENOENT)
                 async for chunk in response.aiter_bytes():
                     fd.write(chunk)
 

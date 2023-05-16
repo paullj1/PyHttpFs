@@ -115,7 +115,9 @@ class File(dict):
             return '/'
 
         parent = self['parent'].full_path()
-        return parent + self['st_path'] + '/'
+        if parent != '/':
+            parent += '/'
+        return parent + self['st_path']
 
     def push_child(self, c):
         self['walked'] = True
